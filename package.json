@@ -59,7 +59,7 @@
     "swig": "^1.4.2",
     "validator": "^3.41.2"
   },
-  "devDependencies": {
+  "peerDependencies":{
     "grunt-concurrent": "^2.0.0",
     "grunt-contrib-copy": "~0.8.0",
     "grunt-contrib-csslint": "~0.4.0",
@@ -76,6 +76,9 @@
     "grunt-node-inspector": "~0.2.0",
     "grunt-nodemon": "~0.4.0",
     "grunt-protractor-runner": "^2.0.0",
+    "load-grunt-tasks": "^3.2.0"
+    },
+  "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.0",
     "gulp-csslint": "~0.1.5",
@@ -99,7 +102,6 @@
     "karma-jasmine": "~0.3.6",
     "karma-ng-html2js-preprocessor": "^0.1.2",
     "karma-phantomjs-launcher": "~0.2.0",
-    "load-grunt-tasks": "^3.2.0",
     "run-sequence": "^1.1.1",
     "should": "^7.0.1",
     "supertest": "^1.0.1"
