@@ -1,0 +1,40 @@
+<section>
+  <div class="page-header">
+    <h1>Blackjack</h1>
+  </div>
+      <div>
+        <h3>Dealer</h3>
+        <ul class="cardlist">
+          <li class="card" ng-repeat="card in vm.dealer.cards">
+            <img ng-src={{card.suitImage}}>
+            <span>{{card.rank}}</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h4>Score</h4>
+        <span ng-bind="vm.dealer.score"></span>
+      </div>
+      <div>
+        <h3>Player</h3>
+        <ul class="cardlist">
+          <li class="card" ng-repeat="card in vm.player.cards">
+            <img ng-src={{card.suitImage}}>
+            <span>{{card.rank}}</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h4>Score</h4>
+        <span ng-bind="vm.player.score"></span>
+      </div>
+      <div ng-show="vm.result !== 'None'">
+        <span ng-bind="vm.result"</span>
+      </div>
+      <button ng-disabled="!vm.newHand()" class="btn" ng-click="vm.deal()">Deal</button>
+      <button ng-disabled="vm.newHand()" class="btn" ng-click="vm.hit()">Hit</button>
+      <button ng-disabled="vm.newHand()" class="btn" ng-click="vm.stand()">Stand</button>
+      <button class="btn" ng-click="vm.newGame()">Shuffle (New Game)</button>
+      <button class="btn" ng-click="vm.getStats()">Get Game Statistics</button>
+
+</section>

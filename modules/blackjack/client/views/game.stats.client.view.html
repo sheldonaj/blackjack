@@ -1,0 +1,16 @@
+<section>
+  <div class="page-header">
+    <h1>Blackjack Statistics</h1>
+  </div>
+      <div>
+        <h3>Dealer</h3>
+        <span>Total Hands Won: </span>
+        <span ng-bind="vm.stats.dealerWins">
+      </div>
+      <div>
+        <h3>Player</h3>
+        <span>Total Hands Won: </span>
+        <span ng-bind="vm.stats.playerWins">
+      </div>
+      <button class="btn" ng-click="vm.returnToGame()">Return to Game</button>
+</section>

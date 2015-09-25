@@ -4,6 +4,7 @@
 angular.module('core').config(['$stateProvider', '$urlRouterProvider',
   function ($stateProvider, $urlRouterProvider) {
 
+    $urlRouterProvider.when('/', '/game');
     // Redirect to 404 when route not found
     $urlRouterProvider.otherwise('not-found');
 
@@ -11,7 +12,8 @@ angular.module('core').config(['$stateProvider', '$urlRouterProvider',
     $stateProvider
       .state('home', {
         url: '/',
-        templateUrl: 'modules/core/views/home.client.view.html'
+        templateUrl: 'modules/core/views/home.client.view.html',
+        redirectTo: 'game'
       })
       .state('not-found', {
         url: '/not-found',

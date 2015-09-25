@@ -1,0 +1,7 @@
+.cardlist {
+ list-style: none;
+}
+
+.card {
+	display: inline;
+}
