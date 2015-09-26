@@ -25,7 +25,7 @@ exports.newGame = function (callback) {
         deckLocation: 0
     };
     saveGame(game, callback);
-}
+};
 
 exports.newHand = function (game, callback) {
     game.dealer.cards = [];
@@ -48,7 +48,7 @@ exports.newHand = function (game, callback) {
     game.result = 'None';
     return updateGame(game, callback);
 
-}
+};
 
 function isInProgress (game) {
     return (game.result === 'None') && (game.dealer.cards.length() > 0);
@@ -80,7 +80,7 @@ exports.hit = function (game, callback) {
     } else {
       return callback(null, game);
     }
-}
+};
 
 function getResult (game, callback) {
     var playerScore = getScore(game.player.cards);
@@ -116,7 +116,7 @@ exports.stand = function (game, callback) {
     } else {
       return callback(null, game);
     }
-}
+};
 
 function saveGame (game, callback) {
   var gameToSave = new Game(game);
@@ -130,14 +130,10 @@ function saveGame (game, callback) {
 
 function updateGame (game, callback) {
   var updatedGame = new Game(game);
-  //delete gameToUpdate._id;
-  console.log("updated game: " + JSON.stringify(updatedGame));
   Game.findByIdAndUpdate(game._id, updatedGame, function (err, doc) {
     if (err) {
-      console.log("Got an error: " + JSON.stringify(err));
       return callback(err, null);
     }
-    console.log("Doc: " + JSON.stringify(doc));
     return callback(null, updatedGame);
   });
 }
@@ -145,9 +141,9 @@ function updateGame (game, callback) {
 function createGameRecord (game, callback) {
   var playerScore = getScore(game.player.cards);
   var dealerScore = getScore(game.dealer.cards);
-  var winner = "Dealer";
-  if(game.result === "Win") {
-    winner = "Player";
+  var winner = 'Dealer';
+  if(game.result === 'Win') {
+    winner = 'Player';
   }
   var gameResult = new GameResult(
     {
@@ -200,9 +196,9 @@ function getCardScore (card) {
     return card.rank;
 }
 
-function getScore(cards) {
+function getScore(hand) {
     var score = 0;
-    var cards = getCards(cards);
+    var cards = getCards(hand);
 
     // Sum all cards
     for (var i = 0; i < cards.length; ++i) {
@@ -214,20 +210,19 @@ function getScore(cards) {
 }
 
 exports.getStats = function(gameId, callback) {
-  console.log("gameId: " + gameId);
-  GameResult.count({gameId: gameId, winner: "Player"}, function(err, tablePlayerWins) {
+  GameResult.count({gameId: gameId, winner: 'Player'}, function(err, tablePlayerWins) {
     if(err) {
       return callback(err, null);
     }
-    GameResult.count({gameId: gameId, winner: "Dealer"}, function(err, tableDealerWins) {
+    GameResult.count({gameId: gameId, winner: 'Dealer'}, function(err, tableDealerWins) {
       if(err) {
         return callback(err, null);
       }
-      GameResult.count({winner: "Player"}, function(err, allTimePlayerWins) {
+      GameResult.count({winner: 'Player'}, function(err, allTimePlayerWins) {
         if(err) {
           return callback(err, null);
         }
-        GameResult.count({winner: "Dealer"}, function(err, allTimeDealerWins) {
+        GameResult.count({winner: 'Dealer'}, function(err, allTimeDealerWins) {
           if(err) {
             return callback(err, null);
           }
@@ -236,7 +231,7 @@ exports.getStats = function(gameId, callback) {
       });
     });
   });
-}
+};
 
 exports.generateResponse = function(game) {
    return {
@@ -251,7 +246,7 @@ exports.generateResponse = function(game) {
         result: game.result,
         id: game._id
     };
-}
+};
 
 exports.getGame = function(gameId, callback) {
   Game.findById(gameId, function (err, doc) {
@@ -260,4 +255,4 @@ exports.getGame = function(gameId, callback) {
     }
     return callback(null, doc);
   });
-}
+};

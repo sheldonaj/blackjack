@@ -20,38 +20,38 @@ function GameService($resource) {
 	};
 
 	function createGame() {
-		var gameResource = $resource(BaseURL + 'new'); 
-		var newGame = new gameResource();
+		var GameResource = $resource(BaseURL + 'new'); 
+		var newGame = new GameResource();
 		return newGame.$save();
-	};
+	}
 
 	function joinGame(gameId) {
-		var gameResource = $resource(BaseURL + ':gameId/join');
-		var game = new gameResource();
+		var GameResource = $resource(BaseURL + ':gameId/join');
+		var game = new GameResource();
 		return game.$save({gameId:gameId});
-	};
+	}
 
 	function hit(gameId) {
-		var gameResource = $resource(BaseURL + ':gameId/hit');
-		var game = new gameResource();
+		var GameResource = $resource(BaseURL + ':gameId/hit');
+		var game = new GameResource();
 		return game.$save({gameId:gameId});
-	};
+	}
 
 	function stand(gameId) {
-		var gameResource = $resource(BaseURL + ':gameId/stand');
-		var game = new gameResource();
+		var GameResource = $resource(BaseURL + ':gameId/stand');
+		var game = new GameResource();
 		return game.$save({gameId:gameId});
-	};
+	}
 
 	function deal(gameId) {
-		var gameResource = $resource(BaseURL + ':gameId/deal');
-		var game = new gameResource();
+		var GameResource = $resource(BaseURL + ':gameId/deal');
+		var game = new GameResource();
 		return game.$save({gameId:gameId});
-	};
+	}
 
 	// GET /api/game/:gameId/stats
 	function getStats(gameId) {
-		var gameResource = $resource(BaseURL + ':gameId/stats', {gameId: gameId});
-		return gameResource.get().$promise;
+		var GameResource = $resource(BaseURL + ':gameId/stats', {gameId: gameId});
+		return GameResource.get().$promise;
 	}
 }

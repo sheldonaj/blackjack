@@ -1,3 +1,4 @@
+'use strict';
 
 function getRandomInt (max) {
     return Math.floor(Math.random() * (max + 1));
@@ -22,6 +23,6 @@ exports.dealNextCard = function (game) {
     var cardNumber = game.cards[game.deckLocation];
     game.deckLocation++;
     return cardNumber;
-}
+};
 
 exports.getShuffledPack = getShuffledPack;

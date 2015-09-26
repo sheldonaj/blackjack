@@ -35,7 +35,7 @@ function GameController($stateParams, $state, GameService, currentGame) {
         updateGameState(updated_game);
       })
       .catch(function(error) {
-        console.log("Failed to update game follow hit action.");
+        console.log('Failed to update game follow hit action.');
       });
   }
 
@@ -45,7 +45,7 @@ function GameController($stateParams, $state, GameService, currentGame) {
         updateGameState(updated_game);
       })
       .catch(function(error) {
-        console.log("Failed to update game follow stand action.");
+        console.log('Failed to update game follow stand action.');
       });
   }
 
@@ -55,7 +55,7 @@ function GameController($stateParams, $state, GameService, currentGame) {
         updateGameState(updated_game);
       })
       .catch(function(error) {
-        console.log("Failed to update game follow deal action.");
+        console.log('Failed to update game follow deal action.');
       });
   }
 
@@ -65,7 +65,7 @@ function GameController($stateParams, $state, GameService, currentGame) {
         updateGameState(updated_game);
       })
       .catch(function(error) {
-        console.log("Failed to create a new game");
+        console.log('Failed to create a new game');
       });
   }
 
