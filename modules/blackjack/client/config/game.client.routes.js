@@ -6,16 +6,22 @@ angular.module('game').config(['$stateProvider',
     // game state routing
     $stateProvider
       .state('game', {
-        url: '/game',
+        url: '/newgame',
+        templateUrl: 'modules/blackjack/views/newgame.client.view.html',
+        controller: 'NewGameController',
+        controllerAs: 'vm'
+      })
+      .state('game_inprogress', {
+        url: '/game/:gameId',
         templateUrl: 'modules/blackjack/views/game.client.view.html',
         controller: 'GameController',
         controllerAs: 'vm',
         resolve: {
-          currentGame: currentGame
+          currentGame: joinGame
         }
       })
       .state('game_stats', {
-        url: '/stats',
+        url: '/game/:gameId/stats',
         templateUrl: 'modules/blackjack/views/game.stats.client.view.html',
         controller: 'GameStatsController',
         controllerAs: 'vm',
@@ -26,12 +32,12 @@ angular.module('game').config(['$stateProvider',
   }
 ]);
 
-currentGame.$inject = ['GameService'];
-function currentGame(GameService) {
-  return GameService.joinGame();
+gameStats.$inject = ['$stateParams', 'GameService'];
+function gameStats($stateParams, GameService) {
+  return GameService.getStats($stateParams.gameId);
 }
 
-gameStats.$inject = ['GameService'];
-function gameStats(GameService) {
-  return GameService.getStats();
+joinGame.$inject = ['$stateParams', 'GameService'];
+function joinGame($stateParams, GameService) {
+  return GameService.joinGame($stateParams.gameId);
 }

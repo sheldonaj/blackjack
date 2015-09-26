@@ -25,32 +25,33 @@ function GameService($resource) {
 		return newGame.$save();
 	};
 
-	function joinGame() {
-		var gameResource = $resource(BaseURL + 'join');
+	function joinGame(gameId) {
+		var gameResource = $resource(BaseURL + ':gameId/join');
 		var game = new gameResource();
-		return game.$save();
+		return game.$save({gameId:gameId});
 	};
 
-	function hit() {
-		var gameResource = $resource(BaseURL + 'hit');
+	function hit(gameId) {
+		var gameResource = $resource(BaseURL + ':gameId/hit');
 		var game = new gameResource();
-		return game.$save();
+		return game.$save({gameId:gameId});
 	};
 
-	function stand() {
-		var gameResource = $resource(BaseURL + 'stand');
+	function stand(gameId) {
+		var gameResource = $resource(BaseURL + ':gameId/stand');
 		var game = new gameResource();
-		return game.$save();
+		return game.$save({gameId:gameId});
 	};
 
-	function deal() {
-		var gameResource = $resource(BaseURL + 'deal');
+	function deal(gameId) {
+		var gameResource = $resource(BaseURL + ':gameId/deal');
 		var game = new gameResource();
-		return game.$save();
+		return game.$save({gameId:gameId});
 	};
 
-	function getStats() {
-		var gameResource = $resource(BaseURL + 'stats');
+	// GET /api/game/:gameId/stats
+	function getStats(gameId) {
+		var gameResource = $resource(BaseURL + ':gameId/stats', {gameId: gameId});
 		return gameResource.get().$promise;
 	}
 }

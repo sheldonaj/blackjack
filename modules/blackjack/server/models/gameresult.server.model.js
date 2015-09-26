@@ -14,6 +14,10 @@ var GameResultSchema = new Schema({
     type: Date,
     default: Date.now
   },
+  gameId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Game'
+  },
   player: {
     type: Number,
     required: true

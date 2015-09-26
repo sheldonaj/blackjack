@@ -6,137 +6,156 @@
 var path = require('path'),
   mongoose = require('mongoose'),
   GameResult = mongoose.model('GameResult'),
+  Game = mongoose.model('Game'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
-var drawDeck = null;
 var cards = require('./cards');
 
-// Blackjack game.
-function BlackjackGame () {
-    this.dealerHand = new BlackjackHand();
-    this.playerHand = new BlackjackHand();
-    this.dealerHiddenHand = new BlackjackHand();
-    this.result = 'None';
-    this.cards = cards.createPlayingCards();
-}
-
-BlackjackGame.prototype.newHand = function (callback) {
-
-    this.dealerHand = new BlackjackHand();
-    this.playerHand = new BlackjackHand();
-    this.dealerHiddenHand = new BlackjackHand();
-
-    this.playerHand.addCard(this.cards.dealNextCard());
-    this.dealerHand.addCard(this.cards.dealNextCard());
-    this.playerHand.addCard(this.cards.dealNextCard());
-    this.dealerHiddenHand.addCard(this.dealerHand.cards[0]);
-    this.dealerHiddenHand.addCard(this.cards.dealNextCard());
-
-    if(this.dealerHiddenHand.getScore() === 21) {
-      console.log("Got here");
-      this.dealerHand = this.dealerHiddenHand;
-      this.result = 'Lose';
-      return this.createGameRecord(this.result, callback);
-    }
-    this.result = 'None';
-    return callback();
-
-}
-
-BlackjackGame.prototype.isInProgress = function () {
-    return (this.result === 'None') && (this.dealerHand.hasCards());
-}
-
-BlackjackGame.prototype.toJson = function () {
-    return {
+exports.newGame = function (callback) {
+    var game = {
         dealer: {
-            cards: this.dealerHand.getCards(),
-            score: this.dealerHand.getScore()
+            cards: [],
+            hidden: []
         },
         player: {
-            cards: this.playerHand.getCards(),
-            score: this.playerHand.getScore()
+            cards: []
         },
-        result: this.result
+        result: 'None',
+        cards: cards.getShuffledPack(),
+        deckLocation: 0
     };
+    saveGame(game, callback);
 }
 
-BlackjackGame.prototype.getResultForPlayer = function (callback) {
-    var score = this.playerHand.getScore();
-    this.result = 'None';
+exports.newHand = function (game, callback) {
+    game.dealer.cards = [];
+    game.player.cards = [];
+    game.dealer.hidden = [];
+
+    game.player.cards.push(cards.dealNextCard(game));
+    game.dealer.cards.push(cards.dealNextCard(game));
+    game.player.cards.push(cards.dealNextCard(game));
+    game.dealer.hidden.push(game.dealer.cards[0]);
+    game.dealer.hidden.push(cards.dealNextCard(game));
+
+    if(getScore(game.dealer.hidden) === 21) {
+      game.dealer.cards = game.dealer.hidden;
+      game.result = 'Lose';
+      return createGameRecord(game, function(err) {
+        updateGame(game, callback);
+      });
+    }
+    game.result = 'None';
+    return updateGame(game, callback);
+
+}
+
+function isInProgress (game) {
+    return (game.result === 'None') && (game.dealer.cards.length() > 0);
+}
+
+function getResultForPlayer (game, callback) {
+    var score = getScore(game.player.cards);
+    game.result = 'None';
     if (score > 21) {
-        this.result = 'Bust';
-        return this.createGameRecord(this.result, callback);
+        game.result = 'Bust';
+        return createGameRecord(game, callback);
     }
     return callback();
 }
 
-BlackjackGame.prototype.isGameInProgress = function () {
-    return this.result === 'None';
+function isGameInProgress (game) {
+    return game.result === 'None';
 }
 
-BlackjackGame.prototype.hit = function (callback) {
-    if (this.isGameInProgress()) {
-        this.playerHand.addCard(this.cards.dealNextCard());
-        var currentGame = this;
-        this.getResultForPlayer(function (err) {
-          if(err) {
-            return callback(err);
-          }
-          return callback();
-        });
+exports.hit = function (game, callback) {
+    if (isGameInProgress(game)) {
+      game.player.cards.push(cards.dealNextCard(game));
+      getResultForPlayer(game, function (err) {
+        if(err) {
+          return callback(err);
+        }
+        return updateGame(game, callback);
+      });
+    } else {
+      return callback(null, game);
     }
 }
 
-BlackjackGame.prototype.getResult = function (callback) {
-    var playerScore = this.playerHand.getScore();
-    var dealerScore = this.dealerHand.getScore();
-    var result = 'Lose';
+function getResult (game, callback) {
+    var playerScore = getScore(game.player.cards);
+    var dealerScore = getScore(game.dealer.cards);
+    game.result = 'Lose';
 
-    if (this.playerHand.isBust()) {
-        result = 'Bust';
-    } else if (this.dealerHand.isBust()) {
-        result = 'Win';
+    if (isBust(game.player.cards)) {
+        game.result = 'Bust';
+    } else if (isBust(game.dealer.cards)) {
+        game.result = 'Win';
     }
 
     if (playerScore > dealerScore) {
-        result = 'Win';
+        game.result = 'Win';
     } else if (playerScore === dealerScore) {
-        result = 'Push';
+        game.result = 'Push';
     }
-
-    this.result = result;
-    return this.createGameRecord(result, callback);
+    return createGameRecord(game, callback);
 }
 
-BlackjackGame.prototype.stand = function (callback) {
-    if (this.isGameInProgress()) {
-      this.dealerHand = this.dealerHiddenHand;
-        while (this.dealerHand.getScore() < 17) {
-            this.dealerHand.addCard(this.cards.dealNextCard());        
+exports.stand = function (game, callback) {
+    if (isGameInProgress(game)) {
+        game.dealer.cards = game.dealer.hidden;
+        while (getScore(game.dealer.cards) < 17) {
+            game.dealer.cards.push(cards.dealNextCard(game));
         }
-        this.getResult(function(err) {
+        getResult(game, function(err) {
           if(err) {
             return callback(err);
           }
-          return callback();
+         return updateGame(game, callback);
         });
+    } else {
+      return callback(null, game);
     }
 }
 
-BlackjackGame.prototype.createGameRecord = function (result, callback) {
-  var playerScore = this.playerHand.getScore();
-  var dealerScore = this.dealerHand.getScore();
+function saveGame (game, callback) {
+  var gameToSave = new Game(game);
+  gameToSave.save(function (err, doc) {
+    if (err) {
+      return callback(err, null);
+    }
+    return callback(null, doc);
+  });
+}
+
+function updateGame (game, callback) {
+  var updatedGame = new Game(game);
+  //delete gameToUpdate._id;
+  console.log("updated game: " + JSON.stringify(updatedGame));
+  Game.findByIdAndUpdate(game._id, updatedGame, function (err, doc) {
+    if (err) {
+      console.log("Got an error: " + JSON.stringify(err));
+      return callback(err, null);
+    }
+    console.log("Doc: " + JSON.stringify(doc));
+    return callback(null, updatedGame);
+  });
+}
+
+function createGameRecord (game, callback) {
+  var playerScore = getScore(game.player.cards);
+  var dealerScore = getScore(game.dealer.cards);
   var winner = "Dealer";
-  if(result === "Win") {
+  if(game.result === "Win") {
     winner = "Player";
   }
   var gameResult = new GameResult(
     {
+      gameId: game._id,
       player: playerScore,
       dealer: dealerScore,
       winner: winner,
-      result: result
+      result: game.result
     });
   gameResult.save(function (err) {
     if (err) {
@@ -146,43 +165,33 @@ BlackjackGame.prototype.createGameRecord = function (result, callback) {
   });
 }
 
-
-// Blackjack hand.
-function BlackjackHand() {
-    this.cards = [];
+function isBust (cards) {
+    return getScore(cards) > 21;
 }
 
-BlackjackHand.prototype.hasCards = function () {
-    return this.cards.length > 0;
-}
-
-BlackjackHand.prototype.addCard = function (card) {
-    this.cards.push(card);
-}
-
-BlackjackHand.prototype.numberToSuit = function (number) {
+function numberToSuit (number) {
   var suits = ['C', 'D', 'H', 'S'];
   var index = Math.floor(number / 13);
   return suits[index];
 }
 
-BlackjackHand.prototype.numberToCard = function (number) {
+function numberToCard (number) {
   return {
     rank: (number % 13) + 1,
-    suit: this.numberToSuit(number)
+    suit: numberToSuit(number)
   };
 }
 
-BlackjackHand.prototype.getCards = function () {
+function getCards (cards) {
     var convertedCards = [];
-    for (var i = 0; i < this.cards.length; i++) {
-        var number = this.cards[i];
-        convertedCards[i] = this.numberToCard(number);
+    for (var i = 0; i < cards.length; i++) {
+        var number = cards[i];
+        convertedCards[i] = numberToCard(number);
     }
     return convertedCards;
 }
 
-BlackjackHand.prototype.getCardScore = function (card) {
+function getCardScore (card) {
     if (card.rank === 1) {
         return 11;
     } else if (card.rank >= 11) {
@@ -191,40 +200,64 @@ BlackjackHand.prototype.getCardScore = function (card) {
     return card.rank;
 }
 
-BlackjackHand.prototype.getScore = function () {
+function getScore(cards) {
     var score = 0;
-    var cards = this.getCards();
+    var cards = getCards(cards);
 
     // Sum all cards
     for (var i = 0; i < cards.length; ++i) {
         var card = cards[i];
-        score = score + this.getCardScore(card);
+        score = score + getCardScore(card);
     }
 
     return score;
 }
 
-BlackjackHand.prototype.isBust = function () {
-    return this.getScore() > 21;
-}
-
-// Exports.
-exports.newGame = function () {
-    return new BlackjackGame();
-}
-
-exports.getStats = function(callback) {
-  GameResult.count({winner: "Player"}, function(err, playerWins) {
+exports.getStats = function(gameId, callback) {
+  console.log("gameId: " + gameId);
+  GameResult.count({gameId: gameId, winner: "Player"}, function(err, tablePlayerWins) {
     if(err) {
       return callback(err, null);
     }
-    console.log('playerWins is ' + playerWins);
-    GameResult.count({winner: "Dealer"}, function(err, dealerWins) {
+    GameResult.count({gameId: gameId, winner: "Dealer"}, function(err, tableDealerWins) {
       if(err) {
         return callback(err, null);
       }
-      console.log('dealerWins is ' + dealerWins);
-      return callback(null, {playerWins: playerWins, dealerWins: dealerWins});
+      GameResult.count({winner: "Player"}, function(err, allTimePlayerWins) {
+        if(err) {
+          return callback(err, null);
+        }
+        GameResult.count({winner: "Dealer"}, function(err, allTimeDealerWins) {
+          if(err) {
+            return callback(err, null);
+          }
+          return callback(null, {tablePlayerWins: tablePlayerWins, tableDealerWins: tableDealerWins, allTimePlayerWins: allTimePlayerWins, allTimeDealerWins: allTimeDealerWins});
+        });
+      });
     });
+  });
+}
+
+exports.generateResponse = function(game) {
+   return {
+        dealer: {
+            cards: getCards(game.dealer.cards),
+            score: getScore(game.dealer.cards)
+        },
+        player: {
+            cards: getCards(game.player.cards),
+            score: getScore(game.player.cards)
+        },
+        result: game.result,
+        id: game._id
+    };
+}
+
+exports.getGame = function(gameId, callback) {
+  Game.findById(gameId, function (err, doc) {
+    if (err) {
+      return callback(err, null);
+    }
+    return callback(null, doc);
   });
 }

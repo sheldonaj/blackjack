@@ -5,8 +5,8 @@ angular
   .module('game')
   .controller('GameController', GameController);
 
-GameController.$inject = ['$scope', '$stateParams', '$state', 'GameService', 'currentGame'];
-function GameController($scope, $stateParams, $state, GameService, currentGame) {
+GameController.$inject = ['$stateParams', '$state', 'GameService', 'currentGame'];
+function GameController($stateParams, $state, GameService, currentGame) {
   var vm = this;
   vm.dealer = null;
   vm.player = null;
@@ -19,14 +19,18 @@ function GameController($scope, $stateParams, $state, GameService, currentGame) 
   vm.newGame = newGame;
   vm.getStats = getStats;
 
-  active();
+  var gameId = $stateParams.gameId || null;
 
-  function active() {
-    updateGameState(currentGame);
+  activate();
+
+  function activate() {
+    if(currentGame) {
+      updateGameState(currentGame);
+    }
   }
 
   function hit() {
-    GameService.hit()
+    GameService.hit(gameId)
       .then(function(updated_game) { 
         updateGameState(updated_game);
       })
@@ -36,7 +40,7 @@ function GameController($scope, $stateParams, $state, GameService, currentGame) 
   }
 
   function stand() {
-    GameService.stand()
+    GameService.stand(gameId)
       .then(function(updated_game) { 
         updateGameState(updated_game);
       })
@@ -46,7 +50,7 @@ function GameController($scope, $stateParams, $state, GameService, currentGame) 
   }
 
   function deal() {
-    GameService.deal()
+    GameService.deal(gameId)
       .then(function(updated_game) { 
         updateGameState(updated_game);
       })
@@ -66,13 +70,14 @@ function GameController($scope, $stateParams, $state, GameService, currentGame) 
   }
 
   function getStats() {
-    $state.go('game_stats');
+    $state.go('game_stats', {gameId: gameId});
   }
 
   function updateGameState(updated_game) {
     vm.dealer = updated_game.dealer;
     vm.player = updated_game.player;
     vm.result = updated_game.result;
+    gameId = updated_game.id;
 
     for(var i = 0; i < vm.dealer.cards.length; i++) {
       vm.dealer.cards[i].suitImage = getCardSuitImage(vm.dealer.cards[i]);

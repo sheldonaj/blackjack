@@ -3,14 +3,29 @@
     <h1>Blackjack Statistics</h1>
   </div>
       <div>
+        <h2>This Table</h2>
+      <div>
         <h3>Dealer</h3>
         <span>Total Hands Won: </span>
-        <span ng-bind="vm.stats.dealerWins">
+        <span ng-bind="vm.stats.tableDealerWins">
       </div>
       <div>
         <h3>Player</h3>
         <span>Total Hands Won: </span>
-        <span ng-bind="vm.stats.playerWins">
+        <span ng-bind="vm.stats.tablePlayerWins">
       </div>
+      <div>
+        <h2>All Time</h2>
+      <div>
+        <h3>Dealer</h3>
+        <span>Total Hands Won: </span>
+        <span ng-bind="vm.stats.allTimeDealerWins">
+      </div>
+      <div>
+        <h3>Player</h3>
+        <span>Total Hands Won: </span>
+        <span ng-bind="vm.stats.allTimePlayerWins">
+      </div>
+    </div>
       <button class="btn" ng-click="vm.returnToGame()">Return to Game</button>
 </section>

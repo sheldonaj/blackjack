@@ -1,41 +1,27 @@
 
-function PlayingCards() {
-    this.cards = this.getShuffledPack();
-    this.currentPackLocation = 0;
-}
-
-PlayingCards.prototype.getRandomInt = function (max) {
+function getRandomInt (max) {
     return Math.floor(Math.random() * (max + 1));
 }
 
-PlayingCards.prototype.getShuffledPack = function () {
+function getShuffledPack() {
     var cards = [];
     cards[0] = 0;
     for (var i = 1; i < 52; i++) {
-        var j = this.getRandomInt(i);
+        var j = getRandomInt(i);
         cards[i] = cards[j];
         cards[j] = i;        
     }
     return cards;
 }
 
-PlayingCards.prototype.dealNextCard = function () {
-    
-    console.log("currentPackLocation: " + this.currentPackLocation);
-
-    if (this.currentPackLocation >= this.cards.length) {
-        this.cards = this.getShuffledPack();
-        this.currentPackLocation = 0;
-        console.log("Created new pack");
+exports.dealNextCard = function (game) {
+    if (game.deckLocation >= game.cards.length) {
+        game.cards = getShuffledPack();
+        game.deckLocation = 0;
     }
-
-    var cardNumber = this.cards[this.currentPackLocation];
-    this.currentPackLocation = this.currentPackLocation + 1;
+    var cardNumber = game.cards[game.deckLocation];
+    game.deckLocation++;
     return cardNumber;
 }
 
-function createPlayingCards () {
-    return new PlayingCards();
-}
-
-exports.createPlayingCards = createPlayingCards
+exports.getShuffledPack = getShuffledPack;
