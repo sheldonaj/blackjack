@@ -1,10 +1,11 @@
 'use strict';
 
-// Game controller
+// Game stats controller
 angular
   .module('game')
   .controller('GameStatsController', GameStatsController);
 
+// The game stats REST endpoint is resolved in the routes, so it is not needed here.  
 GameStatsController.$inject = ['$state', '$stateParams', 'gameStats'];
 function GameStatsController($state, $stateParams, gameStats) {
   var vm = this;
@@ -13,6 +14,7 @@ function GameStatsController($state, $stateParams, gameStats) {
 
   vm.returnToGame = returnToGame;
 
+  // Return to the current in progress game.  
   function returnToGame() {
     $state.go('game_inprogress', {gameId: vm.gameId});
   }

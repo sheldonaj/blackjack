@@ -1,6 +1,6 @@
 'use strict';
 
-// Game controller
+// new game controller
 angular
   .module('game')
   .controller('NewGameController', NewGameController);
@@ -11,6 +11,7 @@ function NewGameController($state, GameService) {
   
   vm.newGame = newGame;
 
+  // when the new game button is clicked, call the create game method of the GameService REST api, then go to the game inprogress state.
   function newGame() {
     GameService.createGame()
       .then(function(created_game) { 

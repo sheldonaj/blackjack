@@ -1,5 +1,8 @@
 'use strict';
 
+// Looked at a few different approaches of card shuffling, dealing, deck handling online and liked this idea the best.
+// So not my own invention, but card shuffling/dealing really is a solved problem.  
+
 function getRandomInt (max) {
     return Math.floor(Math.random() * (max + 1));
 }

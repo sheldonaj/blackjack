@@ -1,16 +1,16 @@
 'use strict';
 
+// Main game logic/data manipulation methods.
+// The game state is persisted in the database, and each game (table) is stored in the db under a unique ID.
+// Any method that changes the game state therefore must update the db document.  
+
 /**
  * Module dependencies.
  */
-var path = require('path'),
-  mongoose = require('mongoose'),
-  GameResult = mongoose.model('GameResult'),
-  Game = mongoose.model('Game'),
-  errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
-
 var cards = require('./cards');
+var gameRepository = require('../repository/game.server.repository');
 
+// Initialize and create a new game.
 exports.newGame = function (callback) {
     var game = {
         dealer: {
@@ -24,9 +24,10 @@ exports.newGame = function (callback) {
         cards: cards.getShuffledPack(),
         deckLocation: 0
     };
-    saveGame(game, callback);
+    gameRepository.saveGame(game, callback);
 };
 
+// Deal a new hand
 exports.newHand = function (game, callback) {
     game.dealer.cards = [];
     game.player.cards = [];
@@ -38,22 +39,25 @@ exports.newHand = function (game, callback) {
     game.dealer.hidden.push(game.dealer.cards[0]);
     game.dealer.hidden.push(cards.dealNextCard(game));
 
+    // Handle the case where the dealer gets 21 on their initial draw and make it an instant win.
     if(getScore(game.dealer.hidden) === 21) {
       game.dealer.cards = game.dealer.hidden;
       game.result = 'Lose';
       return createGameRecord(game, function(err) {
-        updateGame(game, callback);
+        gameRepository.updateGame(game, callback);
       });
     }
     game.result = 'None';
-    return updateGame(game, callback);
+    return gameRepository.updateGame(game, callback);
 
 };
 
+// Whether hand is in progress
 function isInProgress (game) {
     return (game.result === 'None') && (game.dealer.cards.length() > 0);
 }
 
+// Determine if player result ends hand (bust) or not.
 function getResultForPlayer (game, callback) {
     var score = getScore(game.player.cards);
     game.result = 'None';
@@ -68,6 +72,7 @@ function isGameInProgress (game) {
     return game.result === 'None';
 }
 
+// Player hit.  Deal them a card and check if hand is ended or not.
 exports.hit = function (game, callback) {
     if (isGameInProgress(game)) {
       game.player.cards.push(cards.dealNextCard(game));
@@ -75,13 +80,14 @@ exports.hit = function (game, callback) {
         if(err) {
           return callback(err);
         }
-        return updateGame(game, callback);
+        return gameRepository.updateGame(game, callback);
       });
     } else {
       return callback(null, game);
     }
 };
 
+// Determine hand result.  
 function getResult (game, callback) {
     var playerScore = getScore(game.player.cards);
     var dealerScore = getScore(game.dealer.cards);
@@ -101,6 +107,7 @@ function getResult (game, callback) {
     return createGameRecord(game, callback);
 }
 
+// Player stands, hand is ended.  Dealer draws until they are over 17, then determine result.
 exports.stand = function (game, callback) {
     if (isGameInProgress(game)) {
         game.dealer.cards = game.dealer.hidden;
@@ -111,55 +118,12 @@ exports.stand = function (game, callback) {
           if(err) {
             return callback(err);
           }
-         return updateGame(game, callback);
+         return gameRepository.updateGame(game, callback);
         });
     } else {
       return callback(null, game);
     }
 };
-
-function saveGame (game, callback) {
-  var gameToSave = new Game(game);
-  gameToSave.save(function (err, doc) {
-    if (err) {
-      return callback(err, null);
-    }
-    return callback(null, doc);
-  });
-}
-
-function updateGame (game, callback) {
-  var updatedGame = new Game(game);
-  Game.findByIdAndUpdate(game._id, updatedGame, function (err, doc) {
-    if (err) {
-      return callback(err, null);
-    }
-    return callback(null, updatedGame);
-  });
-}
-
-function createGameRecord (game, callback) {
-  var playerScore = getScore(game.player.cards);
-  var dealerScore = getScore(game.dealer.cards);
-  var winner = 'Dealer';
-  if(game.result === 'Win') {
-    winner = 'Player';
-  }
-  var gameResult = new GameResult(
-    {
-      gameId: game._id,
-      player: playerScore,
-      dealer: dealerScore,
-      winner: winner,
-      result: game.result
-    });
-  gameResult.save(function (err) {
-    if (err) {
-      return callback(err);
-    }
-    return callback();
-  });
-}
 
 function isBust (cards) {
     return getScore(cards) > 21;
@@ -209,30 +173,21 @@ function getScore(hand) {
     return score;
 }
 
+// request to write a finshed hand result to the database.
+function createGameRecord(game, callback) {
+  var playerScore = getScore(game.player.cards);
+  var dealerScore = getScore(game.dealer.cards);
+  gameRepository.createGameRecord(game, playerScore, dealerScore, callback);
+}
+
 exports.getStats = function(gameId, callback) {
-  GameResult.count({gameId: gameId, winner: 'Player'}, function(err, tablePlayerWins) {
-    if(err) {
-      return callback(err, null);
-    }
-    GameResult.count({gameId: gameId, winner: 'Dealer'}, function(err, tableDealerWins) {
-      if(err) {
-        return callback(err, null);
-      }
-      GameResult.count({winner: 'Player'}, function(err, allTimePlayerWins) {
-        if(err) {
-          return callback(err, null);
-        }
-        GameResult.count({winner: 'Dealer'}, function(err, allTimeDealerWins) {
-          if(err) {
-            return callback(err, null);
-          }
-          return callback(null, {tablePlayerWins: tablePlayerWins, tableDealerWins: tableDealerWins, allTimePlayerWins: allTimePlayerWins, allTimeDealerWins: allTimeDealerWins});
-        });
-      });
-    });
-  });
+  gameRepository.getStats(gameId, callback);
 };
 
+// Really if this was for "real" this should go in an API v1 file or something.
+// This maps the JSON response for a game that the server sends to the client.  
+// Isolating this in a versioned API file would allow the client to request API v1 then if there were any breaking changes in the future
+// the client would be able to control if it wanted v1 or v2+ API responses.
 exports.generateResponse = function(game) {
    return {
         dealer: {
@@ -249,10 +204,5 @@ exports.generateResponse = function(game) {
 };
 
 exports.getGame = function(gameId, callback) {
-  Game.findById(gameId, function (err, doc) {
-    if (err) {
-      return callback(err, null);
-    }
-    return callback(null, doc);
-  });
+  gameRepository.getGame(gameId, callback); 
 };

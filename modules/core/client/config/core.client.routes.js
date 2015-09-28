@@ -4,6 +4,7 @@
 angular.module('core').config(['$stateProvider', '$urlRouterProvider',
   function ($stateProvider, $urlRouterProvider) {
 
+    // Not using the boilerplate 'home' state.  Just redirect to the newgame state as the default starting index.
     $urlRouterProvider.when('/', '/newgame');
     // Redirect to 404 when route not found
     $urlRouterProvider.otherwise('not-found');

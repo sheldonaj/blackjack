@@ -1,9 +1,12 @@
 'use strict';
 
-// Setting up route
+// Setting up client view routes
 angular.module('game').config(['$stateProvider',
   function ($stateProvider) {
-    // game state routing
+    // Three states:  
+    // game = New Game, initial landing page.
+    // game_inprogress = Main game view.  
+    // game_stats = The game statistics view.
     $stateProvider
       .state('game', {
         url: '/newgame',
@@ -32,11 +35,13 @@ angular.module('game').config(['$stateProvider',
   }
 ]);
 
+// Whenever game_stats state route is requested, automatically resolve the gameStats api endpoint.  
 gameStats.$inject = ['$stateParams', 'GameService'];
 function gameStats($stateParams, GameService) {
   return GameService.getStats($stateParams.gameId);
 }
 
+// Whenever game_inprogress state route is requested, automatically resolve and join the game at the current Id.
 joinGame.$inject = ['$stateParams', 'GameService'];
 function joinGame($stateParams, GameService) {
   return GameService.joinGame($stateParams.gameId);

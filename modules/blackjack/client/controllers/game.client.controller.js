@@ -1,17 +1,19 @@
-'use strict';
+'use strict'; 
 
-// Game controller
+// Main Game controller
 angular
   .module('game')
   .controller('GameController', GameController);
 
-GameController.$inject = ['$stateParams', '$state', 'GameService', 'currentGame'];
-function GameController($stateParams, $state, GameService, currentGame) {
+GameController.$inject = ['$state', 'GameService', 'GameHelper', 'currentGame'];
+function GameController($state, GameService, GameHelper, currentGame) {
+  //vm is the main Game view model.  
+  //This controller should be light-weight and only contain methods/properties that need to be bindable for the view. 
   var vm = this;
-  vm.dealer = null;
-  vm.player = null;
-  vm.result = null;
+  // Declare all bindable view model properties at the top so they are easy to see at a glance.
+  vm.game = null;
 
+  // Declare all bindable view model methods.  
   vm.hit = hit;
   vm.stand = stand;
   vm.deal = deal;
@@ -19,20 +21,23 @@ function GameController($stateParams, $state, GameService, currentGame) {
   vm.newGame = newGame;
   vm.getStats = getStats;
 
-  var gameId = $stateParams.gameId || null;
-
   activate();
 
+  // If there is a current active game, it is automatically resolved in the routes as the currentGame.  
   function activate() {
     if(currentGame) {
-      updateGameState(currentGame);
+      vm.game = currentGame;
+      GameHelper.updateCards(vm.game);
     }
   }
 
+  // Hit, stand, deal, newGame methods just maps the button click in the view to the approriate REST GameService method
+  // Error handling is light and debug only. If this was for real it should steer the user to a better not found, server down, etc views.
   function hit() {
-    GameService.hit(gameId)
-      .then(function(updated_game) { 
-        updateGameState(updated_game);
+    GameService.hit(vm.game.id)
+      .then(function(updated_game) {
+        vm.game = updated_game; 
+        GameHelper.updateCards(vm.game);
       })
       .catch(function(error) {
         console.log('Failed to update game follow hit action.');
@@ -40,9 +45,10 @@ function GameController($stateParams, $state, GameService, currentGame) {
   }
 
   function stand() {
-    GameService.stand(gameId)
+    GameService.stand(vm.game.id)
       .then(function(updated_game) { 
-        updateGameState(updated_game);
+        vm.game = updated_game;
+        GameHelper.updateCards(vm.game);
       })
       .catch(function(error) {
         console.log('Failed to update game follow stand action.');
@@ -50,9 +56,10 @@ function GameController($stateParams, $state, GameService, currentGame) {
   }
 
   function deal() {
-    GameService.deal(gameId)
-      .then(function(updated_game) { 
-        updateGameState(updated_game);
+    GameService.deal(vm.game.id)
+      .then(function(updated_game) {
+        vm.game = updated_game; 
+        GameHelper.updateCards(vm.game);
       })
       .catch(function(error) {
         console.log('Failed to update game follow deal action.');
@@ -62,60 +69,22 @@ function GameController($stateParams, $state, GameService, currentGame) {
   function newGame() {
     GameService.createGame()
       .then(function(updated_game) { 
-        updateGameState(updated_game);
+        vm.game = updated_game;
+        GameHelper.updateCards(vm.game);
       })
       .catch(function(error) {
         console.log('Failed to create a new game');
       });
   }
 
+  // Clicking get Stats maps to switching to the game_stats view state.
   function getStats() {
-    $state.go('game_stats', {gameId: gameId});
+    $state.go('game_stats', {gameId: vm.game.id});
   }
 
-  function updateGameState(updated_game) {
-    vm.dealer = updated_game.dealer;
-    vm.player = updated_game.player;
-    vm.result = updated_game.result;
-    gameId = updated_game.id;
-
-    for(var i = 0; i < vm.dealer.cards.length; i++) {
-      vm.dealer.cards[i].suitImage = getCardSuitImage(vm.dealer.cards[i]);
-      vm.dealer.cards[i].rank = getCardRank(vm.dealer.cards[i]);
-    }
-
-    for(var i = 0; i < vm.player.cards.length; i++) {
-      vm.player.cards[i].suitImage = getCardSuitImage(vm.player.cards[i]);
-      vm.player.cards[i].rank = getCardRank(vm.player.cards[i]);
-    }
-  }
-
+  // NewHand is the logic to determine if the Deal button or the Hit, Stand buttons should be enabled. 
+  // Is an incomplete hand in progress, or is a new hand ready to be dealt
   function newHand() {
-    return (!vm.dealer || !vm.dealer.cards) || (vm.dealer.cards.length > 0 && vm.result && vm.result !== 'None');
-  }
-
-  function getCardSuitImage(card) {
-    var image = '/modules/blackjack/img/club.png';
-    if (card.suit === 'H') {
-        image = '/modules/blackjack/img/heart.png';
-    } else if (card.suit === 'S') {
-        image = '/modules/blackjack/img/spade.png';
-    } else if (card.suit === 'D') {
-        image = '/modules/blackjack/img/diamond.png';
-    }
-    return image;
-  }
-
-  function getCardRank(card) {
-    if (card.rank === 1) {
-        return 'A';
-    } else if (card.rank === 11) {
-        return 'J';
-    } else if (card.rank === 12) {
-        return 'Q';
-    } else if (card.rank === 13) {
-        return 'K';
-    }
-    return card.rank;
+    return (!vm.game.dealer || !vm.game.dealer.cards) || (vm.game.dealer.cards.length > 0 && vm.game.result && vm.game.result !== 'None');
   }
 }

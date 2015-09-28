@@ -5,7 +5,7 @@
       <div>
         <h3>Dealer</h3>
         <ul class="cardlist">
-          <li class="card" ng-repeat="card in vm.dealer.cards">
+          <li class="card" ng-repeat="card in vm.game.dealer.cards">
             <img ng-src={{card.suitImage}}>
             <span>{{card.rank}}</span>
           </li>
@@ -13,12 +13,12 @@
       </div>
       <div>
         <h4>Score</h4>
-        <span ng-bind="vm.dealer.score"></span>
+        <span ng-bind="vm.game.dealer.score"></span>
       </div>
       <div>
         <h3>Player</h3>
         <ul class="cardlist">
-          <li class="card" ng-repeat="card in vm.player.cards">
+          <li class="card" ng-repeat="card in vm.game.player.cards">
             <img ng-src={{card.suitImage}}>
             <span>{{card.rank}}</span>
           </li>
@@ -26,10 +26,10 @@
       </div>
       <div>
         <h4>Score</h4>
-        <span ng-bind="vm.player.score"></span>
+        <span ng-bind="vm.game.player.score"></span>
       </div>
-      <div ng-show="vm.result !== 'None'">
-        <span ng-bind="vm.result"</span>
+      <div ng-show="vm.game.result !== 'None'">
+        <span ng-bind="vm.game.result"</span>
       </div>
       <button ng-disabled="!vm.newHand()" class="btn" ng-click="vm.deal()">Deal</button>
       <button ng-disabled="vm.newHand()" class="btn" ng-click="vm.hit()">Hit</button>
