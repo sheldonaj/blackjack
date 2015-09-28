@@ -1,9 +1,9 @@
 As a starting point I cloned the [MEAN.JS boilerplate](http://meanjs.org/)
 
 My thought process is that it would be an easy starting point since it does initial configuration of Express, Mongo, Angular.  It did help with the initial configuration but in hindsight I am not sure I would have done it this way.
-1) There was some learning curve just to figure out the directory structure, build system, and initialization.  
-2) It took some time and amount of messing around to figure out how to make the grunt build system in the boilerplate compatible with the heroku deploy system.
-3) It is way over-kill.  I removed a lot of the boilerplate, but even still there are many extra things.  The original boilerplate include socket-io, facebook/twitter authentiation, and many other things I did not need.
+- There was some learning curve just to figure out the directory structure, build system, and initialization.  
+- It took some time and amount of messing around to figure out how to make the grunt build system in the boilerplate compatible with the heroku deploy system.
+- It is way over-kill.  I removed a lot of the boilerplate, but even still there are many extra things.  The original boilerplate include socket-io, facebook/twitter authentiation, and many other things I did not need.
 
 ## Prerequisites
 Make sure you have installed all of the following prerequisites on your development machine:
@@ -43,13 +43,15 @@ Both the client and server code are in there.
 
 The overall design is:
 Angular client front-end, that call REST api endpoints.
-- There are three main front-end views:  landing page (new game), the main in progress game view, the game statistics page.
+- There are three main front-end views:  landing page (new game), the main in progress game view, the game statistics page. /modules/blackjack/client/views
+- The view models that the view bind to: /modules/blackjack/client/controllers
+- The services that perform any front-end logic, and handle the REST api calls: /modules/blackjack/client/services
 
 Express/Node back-end.
-- Routes that map the REST api to the correct logic methods and response.
-- Logic layer that handle the actions, and data state changes.
-- The game's state itself is persisted in a Mongo Db under an unique Id.
-- Db layer that isolates all db queries from the game logic layer.
+- Routes that map the REST api to the correct logic methods and response. /modules/blackjack/server/routes
+- Logic layer that handle the actions, and data state changes. /modules/blackjack/server/controllers
+- The game's state itself is persisted in a Mongo Db under an unique Id. /modules/blackjack/server/models
+- Db layer that isolates all db queries from the game logic layer. /modules/blackjack/server/repository
 
 Mongodb.
 - Two collections are stored:
@@ -68,13 +70,13 @@ From a scaling standpoint, the common solution would be to use a load balancer a
 The main scaling flaw in the current design is that Game and GameRecords get written to the database but nothing ever cleans out and removes old entries.  Eventually the db will just fill up.  
 
 This could be solved a couple ways:
-1) A worker just periodically runs and removes entries that are a certain age, or have not had any activity for a certain time period.
-2) When the db reaches a certain threshold of number documents that triggers a mass removal of old documents.
+- A worker just periodically runs and removes entries that are a certain age, or have not had any activity for a certain time period.
+- When the db reaches a certain threshold of number documents that triggers a mass removal of old documents.
 
 Future expansion:
-1) Adding multiple player to the same table.  I would do this using WebSockets, probably using the socket-io library.
--If each game did have socket connections, this also could trigger db cleanup on any game that no longer had connected clients. 
-2) User authentication.  Then users could keep track of their own win/loss records, and continue to play old games when then sign-in rather than being forced to start a new game.
+- Adding multiple player to the same table.  I would do this using WebSockets, probably using the socket-io library.
+- If each game did have socket connections, this also could trigger db cleanup on any game that no longer had connected clients. 
+- User authentication.  Then users could keep track of their own win/loss records, and continue to play old games when then sign-in rather than being forced to start a new game.
 - Also could cap the number of active games a user could have at one time as a solution to filling up the database with game results/records.
 
 
