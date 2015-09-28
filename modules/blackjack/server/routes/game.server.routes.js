@@ -27,7 +27,7 @@ module.exports = function (app) {
 	// POST /api/game/new
   app.post('/api/game/new', function (req, res) {
     game.newGame(function(err, currentGame) {
-    	if(err) {
+    	if(err || !currentGame) {
     		return res.status(500).send({
         		message: errorHandler.getErrorMessage(err)
         	});
@@ -47,7 +47,7 @@ module.exports = function (app) {
 	// POST /api/game/:gameId/join
   app.post('/api/game/:gameId/join', function (req, res) {
   	game.getGame(req.params.gameId, function(err, currentGame) {
-    	if(err) {
+    	if(err || !currentGame) {
     		return res.status(404).send({
         		message: errorHandler.getErrorMessage(err)
         	});
@@ -64,7 +64,7 @@ module.exports = function (app) {
 	// POST /api/game/:gameId/hit
   app.post('/api/game/:gameId/hit', function (req, res) {
   	game.getGame(req.params.gameId, function(err, currentGame) {
-  		if(err) {
+  		if(err || !currentGame) {
     		return res.status(404).send({
         		message: errorHandler.getErrorMessage(err)
         	});
@@ -84,7 +84,7 @@ module.exports = function (app) {
 	// POST /api/game/:gameId/stand
   app.post('/api/game/:gameId/stand', function (req, res) {
   	game.getGame(req.params.gameId, function(err, currentGame) {
-  		if(err) {
+  		if(err || !currentGame) {
     		return res.status(404).send({
         		message: errorHandler.getErrorMessage(err)
         	});
@@ -104,7 +104,7 @@ module.exports = function (app) {
 	// POST /api/game/:gameId/deal
   app.post('/api/game/:gameId/deal', function (req, res) {
   	game.getGame(req.params.gameId, function(err, currentGame) {
-  		if(err) {
+  		if(err || !currentGame) {
     		return res.status(404).send({
         		message: errorHandler.getErrorMessage(err)
         	});
@@ -124,7 +124,7 @@ module.exports = function (app) {
 	// GET /api/game/:gameId/stats
   app.get('/api/game/:gameId/stats', function (req, res) {
     game.getStats(req.params.gameId, function(err, stats) {
-    	if(err) {
+    	if(err || !stats) {
     		return res.status(404).send({
         		message: errorHandler.getErrorMessage(err)
         	});
