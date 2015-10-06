@@ -24,105 +24,69 @@ module.exports = function (app) {
 	    next();
 	});
 
-	// POST /api/game/new
-  app.post('/api/game/new', function (req, res) {
+  // POST /api/games
+  // Create a new game
+  app.post('/api/games', function (req, res) {
     game.newGame(function(err, currentGame) {
-    	if(err || !currentGame) {
-    		return res.status(500).send({
-        		message: errorHandler.getErrorMessage(err)
-        	});
-    	}
-	    game.newHand(currentGame, function(err, currentGame) {
-	    	if(err) {
-	    		return res.status(500).send({
-	        		message: errorHandler.getErrorMessage(err)
-	        	});
-	    	} else {
-	     		res.send(game.generateResponse(currentGame));
-	     	}
-	    });
-	});
+      if(err || !currentGame) {
+        return res.status(500).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+      }
+      game.newHand(currentGame, function(err, currentGame) {
+        if(err) {
+          return res.status(500).send({
+              message: errorHandler.getErrorMessage(err)
+            });
+        } else {
+          res.status(201).send(game.generateResponse(currentGame));
+        }
+      });
+   });
   });
 
-	// POST /api/game/:gameId/join
-  app.post('/api/game/:gameId/join', function (req, res) {
-  	game.getGame(req.params.gameId, function(err, currentGame) {
-    	if(err || !currentGame) {
-    		return res.status(404).send({
-        		message: errorHandler.getErrorMessage(err)
-        	});
-    	} else {
-     		res.send(game.generateResponse(currentGame));
-     	}
+  // GET /api/game/:gameId
+  // Retrieve an existing game
+  app.get('/api/games/:gameId', function (req, res) {
+    game.getGame(req.params.gameId, function(err, currentGame) {
+      if(err || !currentGame) {
+        return res.status(404).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+      } else {
+        res.send(game.generateResponse(currentGame));
+      }
     });
   });
 
-  // The main POST actions follow the pattern of:
-  // 1) Retreive the game at the given Id
-  // 2) Perform the action against that game.
-
-	// POST /api/game/:gameId/hit
-  app.post('/api/game/:gameId/hit', function (req, res) {
-  	game.getGame(req.params.gameId, function(err, currentGame) {
-  		if(err || !currentGame) {
-    		return res.status(404).send({
-        		message: errorHandler.getErrorMessage(err)
-        	});
-	    }
-	    game.hit(currentGame, function(err, currentGame) {
-	    	if(err) {
-	    		return res.status(500).send({
-	        		message: errorHandler.getErrorMessage(err)
-	        	});
-	    	} else {
-	     		res.send(game.generateResponse(currentGame));
-	     	}
-	    });
-    });
-  });
-
-	// POST /api/game/:gameId/stand
-  app.post('/api/game/:gameId/stand', function (req, res) {
-  	game.getGame(req.params.gameId, function(err, currentGame) {
-  		if(err || !currentGame) {
-    		return res.status(404).send({
-        		message: errorHandler.getErrorMessage(err)
-        	});
-	    }
-	    game.stand(currentGame, function(err, currentGame) {
-	    	if(err) {
-	    		return res.status(500).send({
-	        		message: errorHandler.getErrorMessage(err)
-	        	});
-	    	} else {
-	     		res.send(game.generateResponse(currentGame));
-	     	}
-	    });
-    });
-  });
-
-	// POST /api/game/:gameId/deal
-  app.post('/api/game/:gameId/deal', function (req, res) {
-  	game.getGame(req.params.gameId, function(err, currentGame) {
-  		if(err || !currentGame) {
-    		return res.status(404).send({
-        		message: errorHandler.getErrorMessage(err)
-        	});
-	    }
-	    game.newHand(currentGame, function(err, currentGame) {
-	    	if(err) {
-	    		return res.status(500).send({
-	        		message: errorHandler.getErrorMessage(err)
-	        	});
-	    	} else {
-	     		res.send(game.generateResponse(currentGame));
-	     	}
-	    });
+// PATCH /api/game/:gameId/
+// Update an existing game.
+// body will contain the updateType: hit || stand || deal.
+  app.patch('/api/games/:gameId', function (req, res) {
+    game.getGame(req.params.gameId, function(err, currentGame) {
+      if(err || !currentGame) {
+        return res.status(404).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+      }
+      var updateType = req.body.updateType;
+      if(!updateType) {
+        return res.status(400).send({message: 'Missing Action'});
+      }
+      game.update(currentGame, updateType, function(err, currentGame) {
+        if(err) {
+          return res.status(500).send({
+              message: errorHandler.getErrorMessage(err)
+            });
+        } else {
+          res.send(game.generateResponse(currentGame));
+        }
+      });
     });
   });
 
 	// GET /api/game/:gameId/stats
-  app.get('/api/game/:gameId/stats', function (req, res) {
+  app.get('/api/games/:gameId/stats', function (req, res) {
     game.getStats(req.params.gameId, function(err, stats) {
     	if(err || !stats) {
     		return res.status(404).send({

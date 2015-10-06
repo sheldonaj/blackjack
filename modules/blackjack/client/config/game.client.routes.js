@@ -15,16 +15,16 @@ angular.module('game').config(['$stateProvider',
         controllerAs: 'vm'
       })
       .state('game_inprogress', {
-        url: '/game/:gameId',
+        url: '/games/:gameId',
         templateUrl: 'modules/blackjack/views/game.client.view.html',
         controller: 'GameController',
         controllerAs: 'vm',
         resolve: {
-          currentGame: joinGame
+          currentGame: getGame
         }
       })
       .state('game_stats', {
-        url: '/game/:gameId/stats',
+        url: '/games/:gameId/stats',
         templateUrl: 'modules/blackjack/views/game.stats.client.view.html',
         controller: 'GameStatsController',
         controllerAs: 'vm',
@@ -42,7 +42,7 @@ function gameStats($stateParams, GameService) {
 }
 
 // Whenever game_inprogress state route is requested, automatically resolve and join the game at the current Id.
-joinGame.$inject = ['$stateParams', 'GameService'];
-function joinGame($stateParams, GameService) {
-  return GameService.joinGame($stateParams.gameId);
+getGame.$inject = ['$stateParams', 'GameService'];
+function getGame($stateParams, GameService) {
+  return GameService.getGame($stateParams.gameId);
 }

@@ -10,51 +10,50 @@ angular
 GameService.$inject = ['$resource'];
 
 function GameService($resource) {
-	var BaseURL = '/api/game/';
+	var BaseURL = '/api/games/';
 
 	// Expose all service methods as named functions for better readability.
 	return {
 		createGame: createGame,
-		joinGame: joinGame,
+		getGame: getGame,
 		hit: hit,
 		stand: stand,
 		deal: deal,
 		getStats: getStats
 	};
 
-	// POST /api/game/new
+	// POST /api/games
 	function createGame() {
-		var GameResource = $resource(BaseURL + 'new'); 
+		var GameResource = $resource(BaseURL); 
 		var newGame = new GameResource();
 		return newGame.$save();
 	}
 
-	// POST /api/game/:gameId/join
-	function joinGame(gameId) {
-		var GameResource = $resource(BaseURL + ':gameId/join');
-		var game = new GameResource();
-		return game.$save({gameId:gameId});
+	// GET /api/games/:gameId
+	function getGame(gameId) {
+		var GameResource = $resource(BaseURL + ':gameId', {gameId: gameId});
+		return GameResource.get().$promise;
 	}
 
-	// POST /api/game/:gameId/hit
+	// PATCH /api/games/:gameId  {updateType:hit}
 	function hit(gameId) {
-		var GameResource = $resource(BaseURL + ':gameId/hit');
-		var game = new GameResource();
-		return game.$save({gameId:gameId});
+		var GameResource = $resource(BaseURL + ':gameId', null, {'update': {method: 'PATCH'}});
+		var game = new GameResource({updateType: 'hit'});
+		return game.$update({gameId:gameId});
 	}
 
-	// POST /api/game/:gameId/stand
+	// PATCH /api/games/:gameId {updateType:stand}
 	function stand(gameId) {
-		var GameResource = $resource(BaseURL + ':gameId/stand');
-		var game = new GameResource();
-		return game.$save({gameId:gameId});
+		var GameResource = $resource(BaseURL + ':gameId', null, {'update': {method: 'PATCH'}});
+		var game = new GameResource({updateType: 'stand'});
+		return game.$update({gameId:gameId});
 	}
 
-	// POST /api/game/:gameId/deal
+	// PATCH /api/games/:gameId {updateType:deal}
 	function deal(gameId) {
-		var GameResource = $resource(BaseURL + ':gameId/deal');
-		var game = new GameResource();
-		return game.$save({gameId:gameId});
+		var GameResource = $resource(BaseURL + ':gameId', null, {'update': {method: 'PATCH'}});
+		var game = new GameResource({updateType: 'deal'});
+		return game.$update({gameId:gameId});
 	}
 
 	// GET /api/game/:gameId/stats

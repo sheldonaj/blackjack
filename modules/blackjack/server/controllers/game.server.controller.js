@@ -72,8 +72,22 @@ function isGameInProgress (game) {
     return game.result === 'None';
 }
 
+// Update the current game by performing a game action, hit, stand, or deal
+exports.update = function(game, action, callback) {
+    switch(action) {
+        case 'hit': 
+            return hit(game, callback);
+        case 'stand':
+            return stand(game, callback);
+        case 'deal':
+            return this.newHand(game, callback);
+        default : 
+            return callback("Invalid Action", null);
+    }
+}
+
 // Player hit.  Deal them a card and check if hand is ended or not.
-exports.hit = function (game, callback) {
+function hit (game, callback) {
     if (isGameInProgress(game)) {
       game.player.cards.push(cards.dealNextCard(game));
       getResultForPlayer(game, function (err) {
@@ -108,7 +122,7 @@ function getResult (game, callback) {
 }
 
 // Player stands, hand is ended.  Dealer draws until they are over 17, then determine result.
-exports.stand = function (game, callback) {
+function stand (game, callback) {
     if (isGameInProgress(game)) {
         game.dealer.cards = game.dealer.hidden;
         while (getScore(game.dealer.cards) < 17) {
