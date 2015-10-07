@@ -1,7 +1,28 @@
+.table {
+	background-color: #33FF33;
+}
+
 .cardlist {
  list-style: none;
 }
 
 .card {
-	display: inline;
+	display: inline-block;
+	border: 2px solid;
+	margin: 2px;
+	background-color: white;
+}
+
+.cardRank {
+	display: block;
+	margin-left: 2px;
+}
+
+.cardRankBottom {
+	display: block;
+	margin-left: 50px;
+}
+
+.cardImage {
+	margin: 10px 15px 15px 15px;
 }

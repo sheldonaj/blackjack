@@ -1,0 +1,8 @@
+
+<ul class="cardlist">
+  <li class="card" ng-repeat="card in vm.cards">
+    <span class="cardRank">{{vm.getCardRank(card)}}</span>
+    <img class="cardImage" ng-src={{vm.getCardImage(card)}}>
+    <span class="cardRankBottom">{{vm.getCardRank(card)}}</span>
+  </li>
+</ul>

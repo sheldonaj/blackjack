@@ -9,23 +9,9 @@ GameHelper.$inject = [];
 
 function GameHelper() {
 	return {
-		updateCards: updateCards,
 		getCardSuitImage: getCardSuitImage,
 		getCardRank: getCardRank
 	};
-
-	// Convert cards to suit image and face card values.
-	function updateCards(updated_game) {
-    for(var i = 0; i < updated_game.dealer.cards.length; i++) {
-      updated_game.dealer.cards[i].suitImage = getCardSuitImage(updated_game.dealer.cards[i]);
-      updated_game.dealer.cards[i].rank = getCardRank(updated_game.dealer.cards[i]);
-    }
-
-    for(var i = 0; i < updated_game.player.cards.length; i++) {
-      updated_game.player.cards[i].suitImage = getCardSuitImage(updated_game.player.cards[i]);
-      updated_game.player.cards[i].rank = getCardRank(updated_game.player.cards[i]);
-    }
-  }
 
   	// Map card suit to correct suit image.
 	function getCardSuitImage(card) {

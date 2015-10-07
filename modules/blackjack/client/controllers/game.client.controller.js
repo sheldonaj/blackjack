@@ -5,8 +5,8 @@ angular
   .module('game')
   .controller('GameController', GameController);
 
-GameController.$inject = ['$state', 'GameService', 'GameHelper', 'currentGame'];
-function GameController($state, GameService, GameHelper, currentGame) {
+GameController.$inject = ['$state', 'GameService', 'currentGame'];
+function GameController($state, GameService, currentGame) {
   //vm is the main Game view model.  
   //This controller should be light-weight and only contain methods/properties that need to be bindable for the view. 
   var vm = this;
@@ -27,7 +27,6 @@ function GameController($state, GameService, GameHelper, currentGame) {
   function activate() {
     if(currentGame) {
       vm.game = currentGame;
-      GameHelper.updateCards(vm.game);
     }
   }
 
@@ -37,10 +36,9 @@ function GameController($state, GameService, GameHelper, currentGame) {
     GameService.hit(vm.game.id)
       .then(function(updated_game) {
         vm.game = updated_game; 
-        GameHelper.updateCards(vm.game);
       })
       .catch(function(error) {
-        console.log('Failed to update game follow hit action.');
+        console.log('Failed to update game follow hit action.' + error);
       });
   }
 
@@ -48,10 +46,9 @@ function GameController($state, GameService, GameHelper, currentGame) {
     GameService.stand(vm.game.id)
       .then(function(updated_game) { 
         vm.game = updated_game;
-        GameHelper.updateCards(vm.game);
       })
       .catch(function(error) {
-        console.log('Failed to update game follow stand action.');
+        console.log('Failed to update game follow stand action.' + error);
       });
   }
 
@@ -59,10 +56,9 @@ function GameController($state, GameService, GameHelper, currentGame) {
     GameService.deal(vm.game.id)
       .then(function(updated_game) {
         vm.game = updated_game; 
-        GameHelper.updateCards(vm.game);
       })
       .catch(function(error) {
-        console.log('Failed to update game follow deal action.');
+        console.log('Failed to update game follow deal action.' + error);
       });
   }
 
@@ -70,10 +66,9 @@ function GameController($state, GameService, GameHelper, currentGame) {
     GameService.createGame()
       .then(function(updated_game) { 
         vm.game = updated_game;
-        GameHelper.updateCards(vm.game);
       })
       .catch(function(error) {
-        console.log('Failed to create a new game');
+        console.log('Failed to create a new game' + error);
       });
   }
 

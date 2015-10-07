@@ -2,14 +2,10 @@
   <div class="page-header">
     <h1>Blackjack</h1>
   </div>
+  <div class="table">
       <div>
         <h3>Dealer</h3>
-        <ul class="cardlist">
-          <li class="card" ng-repeat="card in vm.game.dealer.cards">
-            <img ng-src={{card.suitImage}}>
-            <span>{{card.rank}}</span>
-          </li>
-        </ul>
+        <game-card cards="vm.game.dealer.cards">
       </div>
       <div>
         <h4>Score</h4>
@@ -17,12 +13,7 @@
       </div>
       <div>
         <h3>Player</h3>
-        <ul class="cardlist">
-          <li class="card" ng-repeat="card in vm.game.player.cards">
-            <img ng-src={{card.suitImage}}>
-            <span>{{card.rank}}</span>
-          </li>
-        </ul>
+        <game-card cards="vm.game.player.cards">
       </div>
       <div>
         <h4>Score</h4>
@@ -31,10 +22,10 @@
       <div ng-show="vm.game.result !== 'None'">
         <span ng-bind="vm.game.result"</span>
       </div>
-      <button ng-disabled="!vm.newHand()" class="btn" ng-click="vm.deal()">Deal</button>
-      <button ng-disabled="vm.newHand()" class="btn" ng-click="vm.hit()">Hit</button>
-      <button ng-disabled="vm.newHand()" class="btn" ng-click="vm.stand()">Stand</button>
-      <button class="btn" ng-click="vm.newGame()">Shuffle (New Game)</button>
-      <button class="btn" ng-click="vm.getStats()">Get Game Statistics</button>
-
+  </div>
+  <button ng-disabled="!vm.newHand()" class="btn" ng-click="vm.deal()">Deal</button>
+  <button ng-disabled="vm.newHand()" class="btn" ng-click="vm.hit()">Hit</button>
+  <button ng-disabled="vm.newHand()" class="btn" ng-click="vm.stand()">Stand</button>
+  <button class="btn" ng-click="vm.newGame()">Shuffle (New Game)</button>
+  <button class="btn" ng-click="vm.getStats()">Get Game Statistics</button>
 </section>
